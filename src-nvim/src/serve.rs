@@ -135,7 +135,15 @@ struct BlobParams {
     commit: CommitId,
     file: PathBuf,
     old_path: Option<PathBuf>,
-    tree: String,
+    tree: TreeKind,
+}
+
+#[derive(Deserialize, PartialEq, Eq)]
+#[serde(rename_all(deserialize = "lowercase"))]
+enum TreeKind {
+    Base,
+    Marker,
+    Target,
 }
 
 fn blob_to_string(id: u64, blob: &git2::Blob) -> Result<String, Response> {
@@ -167,18 +175,16 @@ fn handle_blob(id: u64, repo: &git2::Repository, params: &serde_json::Value) -> 
         Err(e) => return Response::err(id, format!("failed to get marker commit: {e}")),
     };
 
-    let tree = match params.tree.as_str() {
-        "base" => marker.base_tree(),
-        "marker" => marker.marker_tree(),
-        "target" => marker.target_tree(),
-        other => return Response::err(id, format!("invalid tree kind: {other}")),
+    let tree = match params.tree {
+        TreeKind::Base => marker.base_tree(),
+        TreeKind::Marker => marker.marker_tree(),
+        TreeKind::Target => marker.target_tree(),
     };
 
-    let lookup_path = match params.tree.as_str() {
-        "target" => &params.file,
-        "base" => params.old_path.as_ref().unwrap_or(&params.file),
-        "marker" => &params.file,
-        _ => &params.file,
+    let lookup_path = match params.tree {
+        TreeKind::Target => &params.file,
+        TreeKind::Base => params.old_path.as_ref().unwrap_or(&params.file),
+        TreeKind::Marker => &params.file,
     };
 
     let content = match tree.get_path(lookup_path) {
@@ -186,7 +192,7 @@ fn handle_blob(id: u64, repo: &git2::Repository, params: &serde_json::Value) -> 
             Ok(blob) => try_or_return!(blob_to_string(id, &blob)),
             Err(e) => return Response::err(id, format!("failed to read blob: {e}")),
         },
-        Err(_) if params.tree == "marker" => {
+        Err(_) if params.tree == TreeKind::Marker => {
             if let Some(ref old_path) = params.old_path {
                 match tree.get_path(old_path) {
                     Ok(entry) => match repo.find_blob(entry.id()) {
