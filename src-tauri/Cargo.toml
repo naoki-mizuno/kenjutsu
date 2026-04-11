@@ -20,7 +20,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 git2 = { workspace = true }
-kenjutu-core = { workspace = true, features = ["specta"] }
+kenjutu-core = { workspace = true, features = ["specta", "highlighting"] }
 kenjutu-types = { workspace = true, features = ["specta", "serde"] }
 log = { workspace = true }
 comment-commit = { workspace = true, features = ["specta"] }

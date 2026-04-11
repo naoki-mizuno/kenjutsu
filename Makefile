@@ -27,7 +27,7 @@ test-lua: ## Run Neovim plugin tests
 	nvim -l tests/run.lua
 
 build-kjn: ## Build Neovim plugin binary from source
-	cargo build --release --bin kjn
+	cargo build --release -p kenjutu-nvim --bin kjn
 
 install-kjn: ## Download prebuilt kjn binary
 	nvim -l lua/kenjutu/install.lua

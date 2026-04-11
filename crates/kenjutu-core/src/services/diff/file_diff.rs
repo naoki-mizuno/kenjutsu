@@ -8,8 +8,11 @@ use two_face::re_exports::syntect::parsing::SyntaxReference;
 use super::{Error, Result};
 use crate::models::{DiffHunk, DiffLine, DiffLineType, FileDiff, HighlightToken};
 use crate::services::git;
-use crate::services::highlight::{self, HighlightService};
-use crate::services::word_diff::{Block, HunkLines, SideLine, compute_word_diff};
+use highlight::HighlightService;
+use word_diff::{Block, HunkLines, SideLine, compute_word_diff};
+
+mod highlight;
+mod word_diff;
 
 #[derive(Debug)]
 struct Hunk<'a> {

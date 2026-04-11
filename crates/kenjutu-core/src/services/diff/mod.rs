@@ -1,8 +1,10 @@
 use super::git;
 
+#[cfg(feature = "highlighting")]
 pub use file_diff::{PartialReviewDiffs, generate_partial_review_diffs, get_context_lines};
 pub use file_list::generate_file_list;
 
+#[cfg(feature = "highlighting")]
 mod file_diff;
 mod file_list;
 
